@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eatify - Nutrition Tracker</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient-light: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      --primary-gradient-dark: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    }
+    
+    /* Dark mode overrides */
+    html.dark {
+      color-scheme: dark;
+    }
+    
+    html.dark body {
+      background-color: #111827;
+      color: #f3f4f6; 
+    }
+    
+    html.dark .bg-white {
+      background-color: #1f2937;
+    }
+    
+    html.dark .text-gray-800 {
+      color: #f3f4f6;
+    }
+    
+    html.dark .text-gray-700 {
+      color: #e5e7eb;
+    }
+    
+    html.dark .text-gray-600 {
+      color: #d1d5db;
+    }
+    
+    html.dark .text-gray-500 {
+      color: #9ca3af;
+    }
+    
+    html.dark .bg-gray-50 {
+      background-color: #374151;
+    }
+    
+    html.dark .border-gray-300,
+    html.dark .border-gray-200 {
+      border-color: #4b5563;
+    }
+    
+    /* Animations and transitions */
+    .gradient-bg {
+      background: var(--primary-gradient-light);
+      transition: background 0.5s ease;
+    }
+    
+    html.dark .gradient-bg {
+      background: var(--primary-gradient-dark);
+    }
+    
+    .food-card {
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+    }
+    
+    .food-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+    
+    .macro-pill {
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .macro-pill:hover {
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 5px 10px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-bar {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .search-bar:focus-within {
+      transform: scale(1.02);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .benefit-item {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .benefit-item::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #10b981;
+      transition: width 0.3s ease;
+    }
+    
+    .benefit-item:hover::after {
+      width: 100%;
+    }
+    
+    .benefit-item:hover {
+      transform: translateX(5px);
+    }
+    
+    /* Food emojis animation */
+    .floating-emoji {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: float-up 15s linear infinite;
+      opacity: 0.7;
+      z-index: -1;
+    }
+    
+    @keyframes float-up {
+      0% {
+        transform: translateY(110vh) rotate(0deg) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-20vh) rotate(360deg) scale(1.2);
+        opacity: 0;
+      }
+    }
+    
+    /* Theme toggle animation */
+    .theme-toggle {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      border-radius: 12px;
+      background: #f3f4f6;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    html.dark .theme-toggle {
+      background: #374151;
+    }
+    
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fbbf24;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+    }
+    
+    html.dark .theme-toggle::after {
+      left: 27px;
+      background: #94a3b8;
+      box-shadow: 0 0 5px rgba(148, 163, 184, 0.5);
+    }
+    
+    .theme-toggle .sun {
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      transition: all 0.3s ease;
+      opacity: 1;
+      transform: scale(1);
+      color: #f59e0b;
+    }
+    
+    html.dark .theme-toggle .sun {
+      opacity: 0;
+      transform: scale(0);
+    }
+    
+    .theme-toggle .moon {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: scale(0);
+      color: #94a3b8;
+    }
+    
+    html.dark .theme-toggle .moon {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    /* Pulse animation */
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+    }
+    
+    .pulse-slow {
+      animation: pulse 3s infinite ease-in-out;
+    }
+    
+    /* Button hover effects */
+    .btn-hover-effect {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-hover-effect::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150%;
+      height: 150%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    
+    .btn-hover-effect:hover::after {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    
+    /* Social media icons */
+    .social-icon {
+      transition: all 0.3s ease;
+    }
+    
+    .social-icon:hover {
+      transform: translateY(-5px);
+    }
+    
+    /* Developer section animation */
+    .developer-section {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .developer-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.7s ease;
+    }
+    
+    .developer-section:hover::before {
+      left: 100%;
+    }
+    
+    /* News bulletin styles */
+    .news-bulletin {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-left: 4px solid #f59e0b;
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .news-bulletin.dark {
+      background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+      border-left: 4px solid #f59e0b;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen transition-colors duration-300">
+  <!-- Food emojis container -->
+  <div id="floating-emojis-container"></div>
+  
+  <div id="app">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+      <div class="container mx-auto py-6 px-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-utensils text-2xl pulse-slow"></i>
+            <h1 class="text-2xl font-bold">Eatify Nutrition Tracker</h1>
+          </div>
+          <nav class="hidden md:flex space-x-6 items-center">
+            <a href="#" class="font-medium hover:text-green-200 transition-colors" onclick="showTab('search')">Search</a>
+            <a href="#" class="font-medium hover:text-green-200 transition-colors" onclick="showTab('diary')">Food Diary</a>
+            <a href="#" class="font-medium hover:text-green-200 transition-colors" onclick="showTab('about')">About</a>
+            <div class="theme-toggle ml-4" onclick="toggleTheme()">
+              <i class="fas fa-sun sun text-xs"></i>
+              <i class="fas fa-moon moon text-xs"></i>
+            </div>
+          </nav>
+          <button class="md:hidden focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto p-4">
+      <!-- News Bulletin -->
+      <div class="news-bulletin p-4 rounded-lg mb-8 transition-colors duration-300">
+        <div class="flex items-start">
+          <div class="mr-3 text-amber-500">
+            <i class="fas fa-bullhorn text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-800 mb-1 transition-colors duration-300">Nutrition Tip of the Day</h3>
+            <p class="text-gray-600 transition-colors duration-300">
+              Did you know? Eating a balanced diet with proteins, carbs, and healthy fats can boost your energy levels by up to 20%! 
+              Try including more whole foods like fruits, vegetables, and lean proteins in your meals.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Section -->
+      <div id="search-tab" class="mb-10">
+        <div class="flex flex-col items-center justify-center py-8">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2 transition-colors duration-300">Discover Nutritious Foods</h2>
+          <p class="text-gray-600 mb-8 text-center max-w-2xl transition-colors duration-300">Search for foods to learn about their nutritional profile and health benefits</p>
+          
+          <div class="search-bar w-full max-w-2xl flex items-center mb-8">
+            <div class="relative flex-grow">
+              <input 
+                id="food-search" 
+                type="text" 
+                placeholder="Enter a food (e.g., Chicken Curry, Pasta, Salad)" 
+                class="w-full px-5 py-4 rounded-l-lg border-0 bg-white shadow-md focus:ring-2 focus:ring-red-500 focus:outline-none text-gray-700 transition-colors duration-300"
+              >
+              <div class="absolute right-0 top-0 h-full flex items-center pr-3">
+                <div id="search-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-t-2 border-r-2 border-red-500"></div>
+              </div>
+            </div>
+            <select 
+              id="meal-select" 
+              class="px-4 py-4 bg-white border-l border-gray-200 text-gray-700 shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+            >
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
+              <option value="snack">Snack</option>
+            </select>
+            <button 
+              id="search-button" 
+              class="bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-r-lg shadow-md transition-colors focus:outline-none btn-hover-effect"
+              onclick="searchFood()"
+            >
+              <i class="fas fa-search mr-2"></i>Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Card -->
+        <div id="food-card" class="hidden food-card bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto transition-colors duration-300">
+          <div class="md:flex">
+            <div class="md:w-1/3 h-64 md:h-auto relative">
+              <img id="food-image" src="" alt="Food Image" class="absolute h-full w-full object-cover">
+            </div>
+            <div class="md:w-2/3 p-6">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 id="food-name" class="text-2xl font-bold text-gray-800 mb-2 transition-colors duration-300"></h3>
+                  <div class="flex flex-wrap gap-2 mb-4">
+                    <span id="calories-pill" class="macro-pill px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium"></span>
+                    <span id="carbs-pill" class="macro-pill px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"></span>
+                    <span id="protein-pill" class="macro-pill px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium"></span>
+                    <span id="fats-pill" class="macro-pill px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium"></span>
+                  </div>
+                </div>
+                <button 
+                  id="add-to-diary" 
+                  class="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex items-center space-x-1 transition-colors btn-hover-effect"
+                  onclick="addToDiary()"
+                >
+                  <i class="fas fa-plus"></i>
+                  <span>Add to Diary</span>
+                </button>
+              </div>
+              
+              <div class="mt-6">
+                <h4 class="text-lg font-semibold text-gray-700 mb-2 transition-colors duration-300">Health Benefits</h4>
+                <ul id="benefits-list" class="space-y-2">
+                  <!-- Benefits will be added here -->
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Food Diary Section -->
+      <div id="diary-tab" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800 transition-colors duration-300">Your Food Diary</h2>
+          <div class="flex space-x-2">
+            <button class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors btn-hover-effect">
+              <i class="fas fa-chevron-left mr-1"></i> Previous Day
+            </button>
+            <button class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors btn-hover-effect">
+              Next Day <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 transition-colors duration-300">
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 transition-colors duration-300">Today's Nutrition Summary</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="bg-amber-50 rounded-lg p-4 text-center transform transition-all hover:scale-105">
+                <p class="text-amber-800 text-sm font-medium">Calories</p>
+                <p class="text-2xl font-bold text-gray-800 transition-colors duration-300" id="total-calories">0</p>
+              </div>
+              <div class="bg-blue-50 rounded-lg p-4 text-center transform transition-all hover:scale-105">
+                <p class="text-blue-800 text-sm font-medium">Carbs</p>
+                <p class="text-2xl font-bold text-gray-800 transition-colors duration-300" id="total-carbs">0g</p>
+              </div>
+              <div class="bg-green-50 rounded-lg p-4 text-center transform transition-all hover:scale-105">
+                <p class="text-green-800 text-sm font-medium">Protein</p>
+                <p class="text-2xl font-bold text-gray-800 transition-colors duration-300" id="total-protein">0g</p>
+              </div>
+              <div class="bg-red-50 rounded-lg p-4 text-center transform transition-all hover:scale-105">
+                <p class="text-red-800 text-sm font-medium">Fats</p>
+                <p class="text-2xl font-bold text-gray-800 transition-colors duration-300" id="total-fats">0g</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Meal sections -->
+          <div id="breakfast-section" class="bg-white rounded-xl shadow-md overflow-hidden transition-colors duration-300">
+            <div class="bg-blue-100 px-6 py-3">
+              <h3 class="text-lg font-semibold text-gray-800 transition-colors duration-300">Breakfast</h3>
+            </div>
+            <div class="p-6">
+              <div id="breakfast-items" class="space-y-4">
+                <div class="text-center text-gray-500 py-6 transition-colors duration-300">No items added yet</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="lunch-section" class="bg-white rounded-xl shadow-md overflow-hidden transition-colors duration-300">
+            <div class="bg-green-100 px-6 py-3">
+              <h3 class="text-lg font-semibold text-gray-800 transition-colors duration-300">Lunch</h3>
+            </div>
+            <div class="p-6">
+              <div id="lunch-items" class="space-y-4">
+                <div class="text-center text-gray-500 py-6 transition-colors duration-300">No items added yet</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="dinner-section" class="bg-white rounded-xl shadow-md overflow-hidden transition-colors duration-300">
+            <div class="bg-purple-100 px-6 py-3">
+              <h3 class="text-lg font-semibold text-gray-800 transition-colors duration-300">Dinner</h3>
+            </div>
+            <div class="p-6">
+              <div id="dinner-items" class="space-y-4">
+                <div class="text-center text-gray-500 py-6 transition-colors duration-300">No items added yet</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="snack-section" class="bg-white rounded-xl shadow-md overflow-hidden transition-colors duration-300">
+            <div class="bg-yellow-100 px-6 py-3">
+              <h3 class="text-lg font-semibold text-gray-800 transition-colors duration-300">Snacks</h3>
+            </div>
+            <div class="p-6">
+              <div id="snack-items" class="space-y-4">
+                <div class="text-center text-gray-500 py-6 transition-colors duration-300">No items added yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- About Section -->
+      <div id="about-tab" class="hidden">
+        <div class="max-w-4xl mx-auto">
+          <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8 transition-colors duration-300">
+            <div class="gradient-bg px-6 py-4 text-white">
+              <h2 class="text-2xl font-bold">About Eatify Nutrition Tracker</h2>
+            </div>
+            <div class="p-8">
+              <p class="text-gray-600 mb-6 transition-colors duration-300">Eatify helps you track your nutrition and discover the health benefits of various foods. Our mission is to make nutrition tracking simple and accessible for everyone.</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-gray-50 p-6 rounded-lg transform transition hover:scale-105 transition-colors duration-300">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center transition-colors duration-300">
+                    <i class="fas fa-utensils text-green-500 mr-2"></i>
+                    Our Mission
+                  </h3>
+                  <p class="text-gray-600 transition-colors duration-300">
+                    To empower people to make informed food choices by providing accurate nutritional information in an easy-to-use platform.
+                  </p>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg transform transition hover:scale-105 transition-colors duration-300">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center transition-colors duration-300">
+                    <i class="fas fa-seedling text-green-500 mr-2"></i>
+                    Features
+                  </h3>
+                  <ul class="text-gray-600 space-y-2 transition-colors duration-300">
+                    <li class="flex items-start">
+                      <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                      <span>Track your daily nutrition</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                      <span>Discover food health benefits</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                      <span>Monitor your eating habits</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="developer-section bg-gradient-to-r from-red-50 to-amber-50 p-6 rounded-xl mb-8 transition-colors duration-300">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                  <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold text-gray-800 mb-1 transition-colors duration-300">DEVELOPED WITH FOOD IN MOUTH BY</h3>
+                    <h2 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-amber-500">AROMAL BS</h2>
+                  </div>
+                  <div class="flex space-x-4">
+                    <a href="https://www.instagram.com/ar._.oz?igsh=bnVha3I0bTJxc20z" target="_blank" class="social-icon text-pink-500 hover:text-pink-600">
+                      <i class="fab fa-instagram text-3xl"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/aromal-bs-74b663343?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" class="social-icon text-blue-500 hover:text-blue-600">
+                      <i class="fab fa-linkedin text-3xl"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-24 transition-transform duration-500 flex items-center space-x-2">
+      <i class="fas fa-check-circle"></i>
+      <span>Added to your food diary!</span>
+    </div>
+  </div>
+
+  <script>
+    // Store the current food data
+    let currentFoodData = null;
+    let diaryItems = {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snack: []
+    };
+    
+    // Show tab function
+    function showTab(tabName) {
+      document.getElementById('search-tab').classList.add('hidden');
+      document.getElementById('diary-tab').classList.add('hidden');
+      document.getElementById('about-tab').classList.add('hidden');
+      
+      document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+    }
+    
+    // Toggle theme function
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      
+      // Update news bulletin for dark mode
+      const bulletin = document.querySelector('.news-bulletin');
+      if (document.documentElement.classList.contains('dark')) {
+        bulletin.classList.add('dark');
+      } else {
+        bulletin.classList.remove('dark');
+      }
+      
+      // Store theme preference
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    
+    // Create floating food emojis
+    function createFloatingEmojis() {
+      const emojis = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍑', '🍍', '🥭', '🍉', '🍏', '🥥', '🍋', '🥑', '🍈', '🍒'];
+      const container = document.getElementById('floating-emojis-container');
+      
+      // Create 15 floating emojis
+      for (let i = 0; i < 15; i++) {
+        const emoji = document.createElement('div');
+        emoji.className = 'floating-emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        
+        // Random positions
+        const left = Math.random() * 100;
+        const delay = Math.random() * 10;
+        const duration = 15 + Math.random() * 10;
+        
+        emoji.style.left = `${left}%`;
+        emoji.style.animationDelay = `${delay}s`;
+        emoji.style.animationDuration = `${duration}s`;
+        
+        container.appendChild(emoji);
+      }
+    }
+    
+    // Search food function
+    async function searchFood() {
+      const foodInput = document.getElementById('food-search');
+      const mealSelect = document.getElementById('meal-select');
+      const searchButton = document.getElementById('search-button');
+      const searchSpinner = document.getElementById('search-spinner');
+      const foodCard = document.getElementById('food-card');
+      
+      if (!foodInput.value.trim()) {
+        return;
+      }
+      
+      // Show loading state
+      searchButton.disabled = true;
+      searchSpinner.classList.remove('hidden');
+      
+      try {
+        const response = await fetch('/api/search-food', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            food: foodInput.value,
+            mealTime: mealSelect.value
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Oops the server is busy right now please try after sometime!!');
+        }
+        
+        const data = await response.json();
+        currentFoodData = {
+          ...data,
+          mealTime: mealSelect.value
+        };
+        
+        // Update UI with food data
+        document.getElementById('food-name').textContent = data.name;
+        document.getElementById('calories-pill').textContent = `${data.calories} kcal`;
+        document.getElementById('carbs-pill').textContent = `Carbs: ${data.carbs}`;
+        document.getElementById('protein-pill').textContent = `Protein: ${data.protein}`;
+        document.getElementById('fats-pill').textContent = `Fats: ${data.fats}`;
+        document.getElementById('food-image').src = data.image_url || 'https://cdn.pixabay.com/photo/2016/03/05/19/02/empty-plate-1238248_640.jpg';
+        
+        // Update benefits list
+        const benefitsList = document.getElementById('benefits-list');
+        benefitsList.innerHTML = '';
+        data.benefits.forEach(benefit => {
+          const li = document.createElement('li');
+          li.className = 'benefit-item flex items-start p-2 rounded-md';
+          li.innerHTML = `
+            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+            <span>${benefit}</span>
+          `;
+          benefitsList.appendChild(li);
+        });
+        
+        // Show the food card
+        foodCard.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to fetch food information. Please try again.');
+      } finally {
+        // Reset loading state
+        searchButton.disabled = false;
+        searchSpinner.classList.add('hidden');
+      }
+    }
+    
+    // Add to diary function
+    async function addToDiary() {
+      if (!currentFoodData) return;
+      
+      try {
+        const response = await fetch('/api/add-to-diary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(currentFoodData),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to add to diary');
+        }
+        
+        // Add to local diary data
+        const mealTime = currentFoodData.mealTime;
+        diaryItems[mealTime].push(currentFoodData);
+        
+        // Update diary UI
+        updateDiaryUI();
+        
+        // Show success toast
+        const toast = document.getElementById('success-toast');
+        toast.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          toast.style.transform = 'translateY(24rem)';
+        }, 3000);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to add food to diary. Please try again.');
+      }
+    }
+    
+    // Update diary UI function
+    function updateDiaryUI() {
+      // Update totals
+      let totalCalories = 0;
+      let totalCarbs = 0;
+      let totalProtein = 0;
+      let totalFats = 0;
+      
+      // Process all diary items
+      Object.values(diaryItems).flat().forEach(item => {
+        totalCalories += item.calories;
+        totalCarbs += parseInt(item.carbs) || 0;
+        totalProtein += parseInt(item.protein) || 0;
+        totalFats += parseInt(item.fats) || 0;
+      });
+      
+      document.getElementById('total-calories').textContent = totalCalories;
+      document.getElementById('total-carbs').textContent = `${totalCarbs}g`;
+      document.getElementById('total-protein').textContent = `${totalProtein}g`;
+      document.getElementById('total-fats').textContent = `${totalFats}g`;
+      
+      // Update meal sections
+      Object.keys(diaryItems).forEach(mealType => {
+        const container = document.getElementById(`${mealType}-items`);
+        if (diaryItems[mealType].length === 0) {
+          container.innerHTML = '<div class="text-center text-gray-500 py-6 transition-colors duration-300">No items added yet</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        diaryItems[mealType].forEach((item, index) => {
+          const itemElement = document.createElement('div');
+          itemElement.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg transition-colors duration-300';
+          itemElement.innerHTML = `
+            <div class="flex items-center">
+              <img src="${item.image_url || 'https://cdn.pixabay.com/photo/2016/03/05/19/02/empty-plate-1238248_640.jpg'}" alt="${item.name}" class="w-12 h-12 rounded-md object-cover mr-4">
+              <div>
+                <h4 class="font-medium text-gray-800 transition-colors duration-300">${item.name}</h4>
+                <div class="text-sm text-gray-500 transition-colors duration-300">${item.calories} kcal</div>
+              </div>
+            </div>
+            <div class="flex space-x-2">
+              <button class="text-gray-500 hover:text-red-500 transition-colors" onclick="removeFromDiary('${mealType}', ${index})">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          `;
+          container.appendChild(itemElement);
+        });
+      });
+    }
+    
+    // Remove from diary function
+    function removeFromDiary(mealType, index) {
+      diaryItems[mealType].splice(index, 1);
+      updateDiaryUI();
+    }
+    
+    // Initialize with search tab showing
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check for saved theme preference
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.querySelector('.news-bulletin').classList.add('dark');
+      }
+      
+      showTab('search');
+      createFloatingEmojis();
+      
+      // Enter key for search
+      document.getElementById('food-search').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          searchFood();
+        }
+      });
+      
+      // Fetch diary data initially
+      fetch('/api/get-diary')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            // Group by meal time
+            data.forEach(item => {
+              const mealTime = item.mealTime || 'breakfast';
+              diaryItems[mealTime].push(item);
+            });
+            updateDiaryUI();
+          }
+        })
+        .catch(err => console.error('Error fetching diary:', err));
+    });
+  </script>
+</body>
+</html>
